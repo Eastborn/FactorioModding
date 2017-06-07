@@ -1,0 +1,48 @@
+{
+  "name": "factorio-modding",
+  "version": "0.0.1",
+  "description": "Me developing factorio mods in lua with some nodejs/web in tandem sometimes",
+  "keywords": [
+    "Factorio",
+    "Modding",
+    "Lua",
+    "NodeJS",
+    "Javascript",
+    "Typescript",
+    "TS",
+    "JS"
+  ],
+  "homepage": "https://github.com/Eastborn/FactorioModding#readme",
+  "bugs": {
+    "url": "https://github.com/Eastborn/FactorioModding/issues"
+  },
+  "license": "AGPL-3.0",
+  "author": {
+    "name": "Eastborn",
+    "email": "eastborn@shadowimage.org",
+    "url": "<UnderConstruction"
+  },
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eastborn/FactorioModding.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
+    "gulp-sequence": "^0.4.6",
+    "gulp-util": "^3.0.8",
+    "gulp-wait": "0.0.2",
+    "gulp-zip": "^4.0.0",
+    "pkg": "^4.0.0",
+    "typings": "^2.1.1",
+    "yargs": "^8.0.1"
+  },
+  "engines": {
+    "node": "~7.6.0"
+  }
+}
