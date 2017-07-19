@@ -1,0 +1,10 @@
+@engie_99
+Make a color palette for trains/stations so you can pick out of recent colors/predetermined by you colors,
+naming would be usefull.
+
+@shredguy99
+Build a train in a train building stations, give it orders and send it on its way
+ShredGuy99: Mod Request: Mods installed to text file
+
+@eastborn
+Stat tracking mod

@@ -1,0 +1,11 @@
+{
+  "name": "ChatToFile",
+  "version": "0.2.1",
+  "title": "Chat To File",
+  "author": "Eastborn",
+  "contact": "eastborn@shadowimage.org",
+  "homepage": "",
+  "description": "Mod catches chat by players using its commands (/d /t /dis /tw /chat /discord /say /twitch) and will write the name of the player with the chat message to a file ('%Factorio%/script-output/stream_data/chat_data.txt')",
+  "factorio_version": "0.15",
+  "dependencies": []
+}

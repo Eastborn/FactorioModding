@@ -1,0 +1,11 @@
+{
+  "name": "GuiTesting",
+  "version": "0.1.0",
+  "title": "Gui testing",
+  "author": "Eastborn",
+  "contact": "eastborn@shadowimage.org",
+  "homepage": "",
+  "description": "This mod will catch the resources produced by the game and output them to files",
+  "factorio_version": "0.15",
+  "dependencies": []
+}

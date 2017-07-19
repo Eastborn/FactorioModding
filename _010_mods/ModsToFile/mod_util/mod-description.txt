@@ -1,0 +1,11 @@
+# Mods To Files #
+Useful tool for streamers so that you can see the mods you have installed
+## Description ##
+The mod will figure out what mods are enabled and print these to a file.
+
+It will be output to "%factorio%/script-output/stream_data/mods_to_file.txt"
+
+## Changelog ##
+The changes the mod has gone trough
+> ### 0.1.0 ###
+> -   Initial release

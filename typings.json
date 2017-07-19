@@ -1,0 +1,11 @@
+{
+  "name": "factorio-modding",
+  "dependencies": {
+    "gulp": "registry:npm/gulp#4.0.0-alpha.2+20160817105618",
+    "gulp-util": "registry:dt/gulp-util#3.0.0+20161129185857",
+    "yargs": "registry:dt/yargs#6.6.0+20170202172539"
+  },
+  "globalDependencies": {
+    "node": "registry:dt/node#7.0.0+20170322231424"
+  }
+}
