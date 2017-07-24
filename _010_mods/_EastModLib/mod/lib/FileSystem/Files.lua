@@ -17,14 +17,19 @@ function Files:new(engine)
 
     obj.queue = {}
 
+    obj.queueLengthIntermediary = 0
     engine.events:on(defines.events.on_tick, function()
         local queueLenght = #obj.queue;
         if (queueLenght <= 0) then
 
-        elseif (queueLenght > 0 and queueLenght <= 60 and game.tick % (60/queueLenght) == 0) then
+        elseif (queueLenght > 0 and queueLenght < 60 and game.tick % obj.queueLengthIntermediary == 0) then
             obj:processQueue();
-        elseif (queueLenght > 60) then
+        elseif (queueLenght >= 60) then
             obj:processQueue(queueLenght/60)
+        end
+
+        if (game.tick % 60 == 0) then
+            obj.queueLengthIntermediary = queueLenght;
         end
     end)
 
@@ -59,7 +64,7 @@ function Files:writeFile(filePath, data, append, player, done)
     local solved = false;
     if (#self.queue > 0) then
         for i=1, #self.queue, 1 do
-            if (self.queue[i].filePath == filePath) then
+            if (self.queue[i].filePath == filePath and self.queue[i].player == player) then
                 if (self.queue[i].remove) then
                     self.queue[i].remove = false;
                 end

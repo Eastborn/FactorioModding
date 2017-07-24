@@ -5,11 +5,13 @@
 /// <reference path="../../typings/index.d.ts" />
 
 import * as fs from "fs";
+import * as ChildProcess from "child_process";
 
 import * as gulp from "gulp";
 import * as gulpSequence from "gulp-sequence";
 import * as gulpClean from "gulp-clean";
 import * as gulpZip from "gulp-zip";
+
 
 export default function (projectName, cb) {
     let factorioFolder = "../../"+fs.readdirSync("../../").filter(function(d) {return d.indexOf('Instance') > -1})[0];
@@ -35,6 +37,12 @@ export default function (projectName, cb) {
             .pipe(gulp.dest("tmp/"+projectNameWithVersion));
     });
 
+    gulp.task("gulp_plugin_build_extract_move", () => {
+        console.log("moving extract");
+        return gulp.src("../_010_mods/"+projectName+"/mod_util/EXTRACT/**/*")
+            .pipe(gulp.dest("tmp/"+projectNameWithVersion+"/EXTRACT"));
+    });
+
     gulp.task("gulp_plugin_build_mod_move_lib", () => {
         console.log("moving lib");
         return gulp.src("../_010_mods/_EastModLib/mod/**/*")
@@ -48,14 +56,26 @@ export default function (projectName, cb) {
             .pipe(gulp.dest(factorioFolder+"/mods/"))
     });
 
-    gulp.task("gulp_plugin_build_mod_clean", (cb) => {
+    gulp.task("gulp_plugin_build_mod_clean", () => {
         console.log("clean temp folder");
         return gulp.src("tmp/"+projectNameWithVersion+"/", {read:false})
             .pipe(gulpClean());
     });
 
+    gulp.task("gulp_plugin_build_mod_create_exe_nodejs", (cb) => {
+        ChildProcess.exec("pkg \"../_010_mods/ChatToFile/mod_util/app/run.js\" --out-dir \"../_010_mods/ChatToFile/mod_util/exe/\"",
+            (error, stdout, stderr)=>{
+                if (error) {
+                    console.error("error packaging the app,", error);
+                } else {
+                    console.log("Created packaged app")
+                }
+                cb();
+            });
+    });
+
     return gulpSequence(
-        ["gulp_plugin_build_mod_remove", "gulp_plugin_build_mod_move", "gulp_plugin_build_mod_move_lib"],
+        ["gulp_plugin_build_mod_remove", "gulp_plugin_build_mod_move", "gulp_plugin_build_mod_move_lib", "gulp_plugin_build_mod_create_exe_nodejs", "gulp_plugin_build_extract_move"],
         "gulp_plugin_build_mod_build",
         "gulp_plugin_build_mod_clean"
     )(cb);

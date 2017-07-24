@@ -11,6 +11,18 @@ local AsciiTypeRange = require('lib.EngineUtils.AsciiTypeRange');
 
 local debug = true;
 
+local A1, A2 = 727595, 798405  -- 5^17=D20*A1+A2
+local D20, D40 = 1048576, 1099511627776  -- 2^20, 2^40
+local X1, X2 = 0, 1
+function EngineUtil.privateRand()
+    local U = X2*A2
+    local V = (X1*A2 + X2*A1) % D20
+    V = (V*D20 + U) % D40
+    X1 = math.floor(V/D20)
+    X2 = V - X1*D20
+    return V/D40
+end
+
 --- Checks a character or string against the asciitype if they match or not match it.
 -- @param charOrString string The string to check.
 -- @param asciiType AsciiType The type to check the string for.
@@ -85,22 +97,40 @@ end
 -- @param rndSeed The addition to the random seed.
 -- @return string The generated string.
 function EngineUtil.GenerateRandomString(length, asciiType, rndSeed)
+    local function rand(len)
+        if (not game) then
+            local rnd = math.floor(EngineUtil.privateRand()*len);
+            if(rnd < 1) then
+                return 1;
+            else
+                return rnd;
+            end
+        else
+            return math.random(1, len)
+        end
+    end
+
     rndSeed = rndSeed or 0;
+    if (game) then
+        math.randomseed(rndSeed);
+    end
+
     if (length < 1) then
         return nil;
     end
 
-
     if game then
         rndSeed = game.tick + rndSeed;
     end
-    math.randomseed(rndSeed);
+
     local strTbl = {""};
     local check = AsciiTypeRange[asciiType].Check;
     local valid = AsciiTypeRange[asciiType].NumberRange;
     local len = #valid;
     for i=1,length do
-        table.insert(strTbl, string.char(valid[math.random(1, len)]));
+
+        local rnd = rand(len)
+        table.insert(strTbl, string.char(valid[rnd]));
     end
 
     return table.concat(strTbl, "");

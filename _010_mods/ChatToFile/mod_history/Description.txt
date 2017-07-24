@@ -1,0 +1,136 @@
+# Chat to File #
+** Currently waiting on communication with ShredGuy99 to realease 0.2 **
+Useful tool for streamers playing multilayer games with their streaming overlays in front of the chat, logs chat/leave/join/death and even supports other mods sending messages to twitch chat
+## Description ##
+In the new and great 0.2.x release of the mod
+- Way more options (you can disable every module separately and even configure your own substitution string - see the mods options under options>mods>per player>Chat To File) *configurable per player*
+  - Chat module - Logs the default chat, everything that is typed by players
+  - Death Module - Logs the deaths of people with a detailed description of how they died (only vanilla supported, mods may give weird results)
+  - Join Module - Logs that people join the server/map
+  - Leave Module - Logs that people leave the server/map
+  - Remote Module - Allows other mods to use the Chat To File functionality (The "Prefix" setting will always be prepended to prevent mod abuse of the bot)
+- You can set a delay so the twitch chat wont be bothered with spoilers.
+- You should be able to change the location of the logging data on the fly, no restarting of the app necessary.
+- It is not recommended to change the Settings Location. this might require a restart of the app.
+
+## Installation ##
+Still waiting for the ShredManual **Poke ShredGuy99 on twitch** it might speed up the process
+My personal install instructions:
+1. Download mod from mod portal
+2. Create or load into the map you want to add it to
+3. Wait at least 2 seconds
+4. Go to the mods folder (%factorio%/mods - usual location: "%appdata%/factorio/mods")
+5. Open the "ChatToFile_0.2.x.zip" file
+6. Open the folder "ChatToFile_0.2.x"
+7. Open the folder "EXTRACT"
+8. Select all files in the folder "EXTRACT"
+9. Right Click on the files in the folder "EXTRACT"
+10. Left Click on "Copy"
+11. Go to the script-output folder (%factorio%/script-output - usual location: "%appdata%/factorio/script-output"
+12. Open the folder "stream-data"
+13. Right Click on empty space in the folder
+14. Left Click on "Paste"
+15. Right Click on "run.cmd"
+16. Left Click on "Edit"
+17. This should have opened up notepad
+18. Now edit whatever you want to set in this file between the 2 quotes (""). For Example. Change **(** SET TwitchUser=""**)** to **(** SET TwitchUser="Eastborn"**)** Rules:
+    * File is **required**
+    * If you set the TwitchUser, TwitchOauthToken or TwitchChannel you **HAVE** to set all three
+    * If you set the DiscordID or DiscordToken you **HAVE** to set both
+19. Save the file
+20. Double Click / run the *run.cmd* file
+## Changelog ##
+The changes the mod has gone trough
+> ### 0.2.1 ###
+> -   Initial release --see description for features
+## Events ##
+The events used by the mod (for performance reasons noted here) *note: Some might not be in here because of the engine i wrote and am using does some stuff like starting and stopping to listen to events*
+> ### on_init ###
+> This function will trigger on creation of a map this mod is added in
+> It will make sure all variables used by the mod are initialized
+> ### on_load ###
+> This event will trigger on load of the game except when a new mod is added to the save
+> When loading make sure classes are re-initialized with their meta-data and makes sure to save data for this save
+> ### on_tick ###
+> This event will trigger every tick of the game
+> Tricky one, the FileSystem will make sure its saving files only when it needs to and tries to spread them over the 60 ticks available in a second.
+> ### on_runtime_mod_setting_changed ###
+> This event will trigger whenever mod option has changed
+>  This will update the settings file so the app knows what to do
+> ### on_player_changed_force ###
+> This event will trigger whenever a player changes force
+>  This will update the player class to the correct force name and resets all other data freshly just to be sure
+> ### on_console_chat ###
+> This event will get triggered by chat messages
+> The mod will catch this and write an entry to the file to be consumed by the app
+> ### on_player_died ###
+> This event will trigger every death by a player
+> The mod will catch this and write an entry to the file to be consumed by the app
+> ### on_player_joined_game ###
+> This event will trigger every time a player joins the server/map
+> The mod will catch this and write an entry to the file to be consumed by the app
+> ### on_player_left_game ###
+> This event will trigger every time a player leaves the server/map
+> The mod will catch this and write an entry to the file to be consumed by the app
+## Remote ##
+The Remote functions available to other mods via *remote.call("ChatToFile", "<functionName>", "<functionparam>")*
+> ### chat(<message>) ###
+> Calling this function will allow you to send the <message> to the chat file to be send to twitch
+> ### playerUpdate(<player_index>) ###
+> Calling this function will allow you to update the player model used by ChatToFile just in case you do something weird with the player and data isn't represented correctly - *execute before chat command*
+___
+___
+___
+___
+___
+
+# Old 0.1.x versions
+The mod catches anyone using the /say command and save this to a file ('%Factorio%/script-output/stream_data/chat_data.txt' by default),
+there is a nodejs/exe file in the EXTRACT folder of the zip that will read this file and output it to twitch/discord based on the parameters in the .cmds
+
+The exe file in the EXTRACT folder is a packaging of nodejs with the modules noted in the included package.json and the file run.js
+I used the nodejs app "pkg" to make this happen, this is open source and can be looked at here: https://github.com/zeit/pkg
+## Changelog ##
+The changes the mod has gone trough
+> ### 0.1.24 ###
+> -   Fixed a bug where when someone died the server could crash
+> ### 0.1.23 ###
+> -   Fixed a bug where typing % in chat will crash the save
+> ### 0.1.22 ###
+> -   Fixed a bug where the reason of dying didn't get replaced properly
+> -   Updated packaged nodejs version from 7.0.0 to 7.1.0
+> -   Changed the server ('run.js'/run-win.exe)
+> ### 0.1.21 ###
+> -   Made sure file contents are scrapped after processing in the exe file/js
+> -   Changed the server ('run.js'/run-win.exe)
+> ### 0.1.2 ###
+> -   Made sure that the hardcoded prefix was not displayed on discord as it was before
+> -   Added functionality to detect when someone died and notify the people on twitch/discord of this, this is changeable just like the chat is, also able to en/disable, includes the prefix
+> -   Fixed the server in how startup commands work, now not all parameters are required but for example if you decide to use twitchuser you HAVE to fill in the twitchoauth and twitchchannel as well
+> ### 0.1.1 ###
+> -   Fixed an issue where when you used an empty string or spaces after the /say command that the mod would crash
+> -   Added a "Prefix" option to the mod settings in game, instead of having it hardcoded on the server,
+>     advised to keep at least something here, since if you have a mod executing these commands on twitch it might have too many rights
+> -   Changed the server ('run.js'/run-win.exe) to print exactly what was written in the file instead of adding "<Factorio> " in front of the message
+> ### 0.1.0 ###
+> -   Initial release
+## Events ##
+The events used by the mod (for performance reasons noted here)
+> ### on_init ###
+> This function will trigger on creation of a map this mod is added in
+> It will make sure all variables used by the mod are initialized
+> ### on_load ###
+> This event will trigger on load of the game except when a new mod is added to the save
+> When loading the mod will make sure to tag the next mod iteration as a save iteration where the file should be overwritten
+> ### on_tick ###
+> This event will trigger every tick of the game
+> The mod will check if it is ready for the next iteration (every **120 ticks** - aka **2 seconds**)
+> *If a mod iteration is on going:*
+>
+> -   The mod will check if the iteration was tagged as a save iteration and if so it will overwrite the file
+> ### on_runtime_mod_setting_changed ###
+> This event will trigger whenever mod option has changed
+>  Will remove the previously saved file so you don't have x amount of files clogging up the save
+> ### on_player_died ###
+> This event will trigger every death by a player
+> The mod will catch this and write an entry to the file to be consumed by the server cmd

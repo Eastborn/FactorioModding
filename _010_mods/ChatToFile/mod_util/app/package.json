@@ -1,0 +1,12 @@
+{
+  "name": "chattofilenode",
+  "version": "0.0.1",
+  "description": "Twitch and Discord bot to print mod chat to the other channels",
+  "main": "run.js",
+  "author": "Eastborn",
+  "dependencies": {
+    "discord.js": "^11.1.0",
+    "tmi.js": "^1.2.1",
+    "yargs": "^8.0.2"
+  }
+}

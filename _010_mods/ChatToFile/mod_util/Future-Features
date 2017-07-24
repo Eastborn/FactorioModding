@@ -1,1 +1,12 @@
-- add /clear functionality that clears the file
+Bug Fixes:
+
+Features:
+- Interface
+- Screenshots of deaths
+
+v 0.2
+    -!CTFCmd
+    -!Deaths <player>
+    -!Messages <player>
+    -!Online
+    -!Players
