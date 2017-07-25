@@ -14,6 +14,48 @@ local basePath = "stream-data/";
 local engine;
 local statics;
 
+local function done()
+    global = global or {}
+    if (not global.players) then
+        global.players = {};
+    end
+
+    if (global.players) then
+        for k,v in ipairs(global.players) do
+            global.players[k] = Player:fromSerialized(v, engine);
+        end
+    else
+        global.players = {}
+    end
+
+    local function getPlayer(player_index)
+        for _,v in ipairs(global.players) do
+            if (player_index == v.player_index) then
+                if (v.logJoin == nil) then
+                    local p = Player:fromSerialized(v, engine);
+                    global.players[_] = p;
+                    return p;
+                end
+                return v;
+            end
+        end
+        local p = Player:new(player_index, engine, basePath);
+        p:saveSettingsFile(engine);
+        statics:save();
+        table.insert(global.players, p);
+        return p;
+    end
+
+    for _,v in pairs(game.players) do
+
+
+        local p = getPlayer(v.index);
+        p:saveSettingsFile(engine);
+    end
+
+    statics:save();
+end
+
 local function getOnline()
     local p = {};
     for _,v in ipairs(global.players) do
@@ -25,6 +67,9 @@ local function getOnline()
 end
 
 local function getPlayer(player_index)
+    if (game and not global.players) then
+        done();
+    end
     for _,v in ipairs(global.players) do
         if (player_index == v.player_index) then
             if (v.logJoin == nil) then
@@ -71,31 +116,7 @@ local function remoteUpdate(player_index)
     end
 end
 
-local function done()
-    global = global or {}
-
-    if (global.players) then
-        for k,v in ipairs(global.players) do
-            global.players[k] = Player:fromSerialized(v, engine);
-        end
-    else
-        global.players = {}
-    end
-
-    for _,v in pairs(game.players) do
-        local p = getPlayer(v.index);
-        p:saveSettingsFile(engine);
-    end
-
-    statics:save();
-end
-
 local function load()
-    global = global or {}
-    if (not global.players) then
-        global.players = {};
-    end
-
     local events = engine.events;
     local settings = engine.settings;
 
@@ -133,9 +154,14 @@ local function load()
         end
     end);
 
-    commands.add_command("ChatToFileClear", "command-help.chat-to-file-clear", function(evt)
+    commands.add_command("ChatToFileClear", "command-help.ctf-clear", function(evt)
         local p = getPlayer(evt.player_index)
         p:clear(function() game.players[p.player_index].print("ChatToFile file '".. p.settingLocation .."' cleared") end, engine);
+    end);
+
+    commands.add_command("ChatToFileWhisper", "command-help.ctf-w", function(evt)
+        local p = getPlayer(evt.player_index)
+        game.print(p.name..": "..evt.parameter);
     end);
 
     remote.add_interface("ChatToFile", {

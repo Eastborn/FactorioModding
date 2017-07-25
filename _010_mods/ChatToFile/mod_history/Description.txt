@@ -1,14 +1,14 @@
 # Chat to File #
-** Currently waiting on communication with ShredGuy99 to realease 0.2 **
+** Currently waiting on communication with ShredGuy99 to realease 0.2.x **
 Useful tool for streamers playing multilayer games with their streaming overlays in front of the chat, logs chat/leave/join/death and even supports other mods sending messages to twitch chat
 ## Description ##
 In the new and great 0.2.x release of the mod
 - Way more options (you can disable every module separately and even configure your own substitution string - see the mods options under options>mods>per player>Chat To File) *configurable per player*
-  - Chat module - Logs the default chat, everything that is typed by players
-  - Death Module - Logs the deaths of people with a detailed description of how they died (only vanilla supported, mods may give weird results)
-  - Join Module - Logs that people join the server/map
-  - Leave Module - Logs that people leave the server/map
-  - Remote Module - Allows other mods to use the Chat To File functionality (The "Prefix" setting will always be prepended to prevent mod abuse of the bot)
+  1. Chat module - Logs the default chat, everything that is typed by players
+  2. Death Module - Logs the deaths of people with a detailed description of how they died (only vanilla supported, mods may give weird results)
+  3. Join Module - Logs that people join the server/map
+  4. Leave Module - Logs that people leave the server/map
+  5. Remote Module - Allows other mods to use the Chat To File functionality (The "Prefix" setting will always be prepended to prevent mod abuse of the bot)
 - You can set a delay so the twitch chat wont be bothered with spoilers.
 - You should be able to change the location of the logging data on the fly, no restarting of the app necessary.
 - It is not recommended to change the Settings Location. this might require a restart of the app.
