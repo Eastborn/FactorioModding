@@ -41,6 +41,10 @@ My personal install instructions:
 20. Double Click / run the *run.cmd* file
 ## Changelog ##
 The changes the mod has gone trough
+> ### 0.2.3 ###
+> -   Changed a typo in the app where it said messages instead of deaths
+> ### 0.2.2 ###
+> -   Changed some things around to test stuff
 > ### 0.2.1 ###
 > -   Initial release --see description for features
 ## Events ##

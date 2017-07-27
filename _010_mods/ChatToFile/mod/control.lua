@@ -14,6 +14,13 @@ local basePath = "stream-data/";
 local engine;
 local statics;
 
+function string:split(sep)
+    local sep, fields = sep or ":", {}
+    local pattern = string.format("([^%s]+)", sep)
+    self:gsub(pattern, function(c) fields[#fields+1] = c end)
+    return fields
+end
+
 local function done()
     global = global or {}
     if (not global.players) then
@@ -29,11 +36,11 @@ local function done()
     end
 
     local function getPlayer(player_index)
-        for _,v in ipairs(global.players) do
+        for k,v in ipairs(global.players) do
             if (player_index == v.player_index) then
                 if (v.logJoin == nil) then
                     local p = Player:fromSerialized(v, engine);
-                    global.players[_] = p;
+                    global.players[k] = p;
                     return p;
                 end
                 return v;
@@ -57,13 +64,15 @@ local function done()
 end
 
 local function getOnline()
-    local p = {};
+    return global.players;
+
+    --[[local p = {};
     for _,v in ipairs(global.players) do
         if (game.players[v.player_index].connected) then
             table.insert(p, v);
         end
     end
-    return p;
+    return p;]]--
 end
 
 local function getPlayer(player_index)
@@ -162,6 +171,44 @@ local function load()
     commands.add_command("ChatToFileWhisper", "command-help.ctf-w", function(evt)
         local p = getPlayer(evt.player_index)
         game.print(p.name..": "..evt.parameter);
+    end);
+
+    commands.add_command("ChatToFileSetDeaths", "command-help.ctf-sd", function(evt)
+        local t = evt.parameter:split(" ");
+        if (#t == 2) then
+            local pl;
+            for _,v in pairs(game.players) do
+                if (v.name:lower() == t[1]:lower()) then
+                       pl = v;
+                end
+            end
+            local t2 = tonumber(t[2]);
+            if (pl) then
+                if (t2) then
+                    local p = getPlayer(pl.index);
+                    local dLen = #p.deaths;
+                    if (dLen > t2) then
+                        local delta = dLen - t2;
+                        for i=1, delta, 1 do
+                            table.remove(p.deaths, 1);
+                        end
+                    elseif (dLen < t2) then
+                        local delta = t2 - dLen
+                        for i=1,delta,1 do
+                            table.insert(p.deaths, 1, "<unknown reason>");
+                        end
+                    end
+                    statics:save();
+                    game.players[evt.player_index].print(pl.name.." his deaths have been set to "..t2);
+                else
+                    game.players[evt.player_index].print("amount of deaths "..t[1].." is not a valid number")
+                end
+            else
+                game.players[evt.player_index].print("player "..t[1].." does not exist")
+            end
+        else
+            game.players[evt.player_index].print("2 parameters needed <Username> and <amount of deaths>")
+        end
     end);
 
     remote.add_interface("ChatToFile", {

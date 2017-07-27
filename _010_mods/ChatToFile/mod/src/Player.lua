@@ -81,22 +81,20 @@ function Player:logChat(message, forPlayers, engine)
             forPlayer:update(forPlayer.player_index);
         end
 
-        if ((not forPlayer.settingEnable) or (not forPlayer.settingChatEnable)) then
-            return nil;
+        if ((forPlayer.settingEnable) and (forPlayer.settingChatEnable)) then
+            local file = forPlayer.basePath .. forPlayer.settingLocation;
+            local prefix = forPlayer.settingPrefix;
+            local sub = forPlayer.settingChatSub;
+
+            local data = prefix ..
+                    sub
+                        :gsub("$f", force)
+                        :gsub("$m", msg)
+                        :gsub("$p", player) ..
+                    "\n";
+
+            engine.files:writeFile(file, data, true, forPlayer.player_index);
         end
-
-        local file = forPlayer.basePath .. forPlayer.settingLocation;
-        local prefix = forPlayer.settingPrefix;
-        local sub = forPlayer.settingChatSub;
-
-        local data = prefix ..
-                sub
-                    :gsub("$f", force)
-                    :gsub("$m", msg)
-                    :gsub("$p", player) ..
-                "\n";
-
-        engine.files:writeFile(file, data, true, forPlayer.player_index);
     end
 end
 
@@ -203,38 +201,36 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
     end
 
     for _,forPlayer in ipairs(forPlayers) do
-        if ((not forPlayer.settingEnable) or (not forPlayer.settingDeathEnable)) then
-            return nil;
-        end
-
-        local deathsSameReason = 0;
-        for _,v in ipairs(self.deaths) do
-            if (v == reason) then
-                deathsSameReason = deathsSameReason + 1
+        if ((forPlayer.settingEnable) and (forPlayer.settingDeathEnable)) then
+            local deathsSameReason = 0;
+            for _,v in ipairs(self.deaths) do
+                if (v == reason) then
+                    deathsSameReason = deathsSameReason + 1
+                end
             end
+
+            local player = EngineUtil.MakeSafeForRegexRepl(self.name);
+            local force = EngineUtil.MakeSafeForRegexRepl(self.force);
+            local rsn = EngineUtil.MakeSafeForRegexRepl(reason);
+            local deaths = #self.deaths;
+
+            local file = forPlayer.basePath .. forPlayer.settingLocation;
+            local prefix = forPlayer.settingPrefix;
+            local sub = forPlayer.settingDeathSub;
+
+            local data = prefix ..
+                    sub
+                        :gsub("$d", deaths)
+                        :gsub("$f", force)
+                        :gsub("$o", forceDeaths)
+                        :gsub("$p", player)
+                        :gsub("$r", rsn)
+                        :gsub("$s", deathsSameReason)
+                        :gsub("$t", totalDeaths) ..
+                    "\n";
+
+            engine.files:writeFile(file, data, true, forPlayer.player_index);
         end
-
-        local player = EngineUtil.MakeSafeForRegexRepl(self.name);
-        local force = EngineUtil.MakeSafeForRegexRepl(self.force);
-        local rsn = EngineUtil.MakeSafeForRegexRepl(reason);
-        local deaths = #self.deaths;
-
-        local file = forPlayer.basePath .. forPlayer.settingLocation;
-        local prefix = forPlayer.settingPrefix;
-        local sub = forPlayer.settingDeathSub;
-
-        local data = prefix ..
-                sub
-                    :gsub("$d", deaths)
-                    :gsub("$f", force)
-                    :gsub("$o", forceDeaths)
-                    :gsub("$p", player)
-                    :gsub("$r", rsn)
-                    :gsub("$s", deathsSameReason)
-                    :gsub("$t", totalDeaths) ..
-                "\n";
-
-        engine.files:writeFile(file, data, true, forPlayer.player_index);
     end
 end
 
@@ -258,24 +254,22 @@ function Player:logJoin(allPlayers, forPlayers, engine)
     local deaths = #self.deaths;
 
     for _,forPlayer in ipairs(forPlayers) do
-        if ((not forPlayer.settingEnable) or (not forPlayer.settingJoinEnable)) then
-            return nil;
+        if ((forPlayer.settingEnable) or (forPlayer.settingJoinEnable)) then
+            local file = forPlayer.basePath .. forPlayer.settingLocation;
+            local prefix = forPlayer.settingPrefix;
+            local sub = forPlayer.settingJoinSub;
+
+            local data = prefix ..
+                sub
+                    :gsub("$d", deaths)
+                    :gsub("$f", force)
+                    :gsub("$o", forceDeaths)
+                    :gsub("$p", player)
+                    :gsub("$t", totalDeaths) ..
+                "\n";
+
+            engine.files:writeFile(file, data, true, forPlayer.player_index);
         end
-
-        local file = forPlayer.basePath .. forPlayer.settingLocation;
-        local prefix = forPlayer.settingPrefix;
-        local sub = forPlayer.settingJoinSub;
-
-        local data = prefix ..
-            sub
-                :gsub("$d", deaths)
-                :gsub("$f", force)
-                :gsub("$o", forceDeaths)
-                :gsub("$p", player)
-                :gsub("$t", totalDeaths) ..
-            "\n";
-
-        engine.files:writeFile(file, data, true, forPlayer.player_index);
     end
 end
 
@@ -299,24 +293,22 @@ function Player:logLeave(allPlayers, forPlayers, engine)
     local deaths = #self.deaths;
 
     for _,forPlayer in ipairs(forPlayers) do
-        if ((not forPlayer.settingEnable) or (not forPlayer.settingLeaveEnable)) then
-            return nil;
+        if ((forPlayer.settingEnable) and (forPlayer.settingLeaveEnable)) then
+            local file = forPlayer.basePath .. forPlayer.settingLocation;
+            local prefix = forPlayer.settingPrefix;
+            local sub = forPlayer.settingLeaveSub;
+
+            local data = prefix ..
+                    sub
+                    :gsub("$d", deaths)
+                    :gsub("$f", force)
+                    :gsub("$o", forceDeaths)
+                    :gsub("$p", player)
+                    :gsub("$t", totalDeaths) ..
+                    "\n";
+
+            engine.files:writeFile(file, data, true, forPlayer.player_index);
         end
-
-        local file = forPlayer.basePath .. forPlayer.settingLocation;
-        local prefix = forPlayer.settingPrefix;
-        local sub = forPlayer.settingLeaveSub;
-
-        local data = prefix ..
-                sub
-                :gsub("$d", deaths)
-                :gsub("$f", force)
-                :gsub("$o", forceDeaths)
-                :gsub("$p", player)
-                :gsub("$t", totalDeaths) ..
-                "\n";
-
-        engine.files:writeFile(file, data, true, forPlayer.player_index);
     end
 end
 

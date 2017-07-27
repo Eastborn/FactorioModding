@@ -1,2 +1,0 @@
-Save 1/xtick when < 60 files to update
-save x/tick when > 60 files to update

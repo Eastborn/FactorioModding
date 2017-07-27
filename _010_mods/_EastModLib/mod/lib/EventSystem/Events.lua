@@ -30,6 +30,7 @@ function Events:addListener(eventName, listener, unshift)
 
     if (self.listeners[eventName] == nil) then
         self.listeners[eventName] = {};
+        script.on_event(eventName, nil);
 
         script.on_event(eventName, function(evt)
             if (self.listeners[eventName] and #self.listeners[eventName] > 0) then

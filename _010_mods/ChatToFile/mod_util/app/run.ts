@@ -164,7 +164,7 @@ if (twitchUser) {
 
             switch(userstate["message-type"]) {
                 case "chat":
-                    onChat(message);
+                    onChat(message, false, userstate.name);
                     break;
                 case "whisper":
                     onChat(message, true, userstate.username);
@@ -200,7 +200,6 @@ if (twitchUser) {
                             setInterval(messageDelay, 1000);
                         }
                         runonce = true;
-
 
 
                     });
@@ -251,6 +250,10 @@ function onChat(message: string, whisper?: boolean, user?: string) {
     -!Online
     -!Players
      */
+    if (user.toLowerCase() == twitchUser.toLowerCase()) {
+        return;
+    }
+
     let m = "";
     message = message.toLowerCase();
     if (message.indexOf('!ctfcmd') > -1) {
@@ -289,7 +292,7 @@ function onChat(message: string, whisper?: boolean, user?: string) {
             m = "There have been " + amount + " deaths in this map";
         } else {
             if (playerDeaths.hasOwnProperty(val)) {
-                m = val + " has sent " + playerDeaths[val] + " messages";
+                m = val + " has died " + playerDeaths[val] + " times";
             } else {
                 m = "The player " + val + " has not been on this map yet";
             }
