@@ -52,15 +52,20 @@ function default_1(projectName, cb) {
             .pipe(gulpClean());
     });
     gulp.task("gulp_plugin_build_mod_create_exe_nodejs", function (cb) {
-        ChildProcess.exec("pkg \"../_010_mods/ChatToFile/mod_util/app/run.js\" --out-dir \"../_010_mods/ChatToFile/mod_util/exe/\"", function (error, stdout, stderr) {
-            if (error) {
-                console.error("error packaging the app,", error);
-            }
-            else {
-                console.log("Created packaged app");
-            }
+        if (projectName.indexOf("ChatToFile") > -1) {
+            ChildProcess.exec("pkg \"../_010_mods/ChatToFile/mod_util/app/run.js\" --out-dir \"../_010_mods/ChatToFile/mod_util/exe/\"", function (error, stdout, stderr) {
+                if (error) {
+                    console.error("error packaging the app,", error);
+                }
+                else {
+                    console.log("Created packaged app");
+                }
+                cb();
+            });
+        }
+        else {
             cb();
-        });
+        }
     });
     return gulpSequence(["gulp_plugin_build_mod_remove", "gulp_plugin_build_mod_move", "gulp_plugin_build_mod_move_lib", "gulp_plugin_build_mod_create_exe_nodejs", "gulp_plugin_build_extract_move"], "gulp_plugin_build_mod_build", "gulp_plugin_build_mod_clean")(cb);
 }

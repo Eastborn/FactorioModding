@@ -211,6 +211,22 @@ local function load()
         end
     end);
 
+    commands.add_command("ChatToFileGetOldDeaths", "command-help.ctf-god", function(evt)
+        if (global.playersDiedInfo and #global.playersDiedInfo > 0) then
+            local obj = {}
+            for _,v in ipairs(global.playersDiedInfo) do
+                if (obj[v.index]) then
+                    obj[v.index] = obj[v.index] + 1;
+                else
+                    obj[v.index] = 1;
+                end
+            end
+            for k,v in pairs(obj) do
+                game.players[evt.player_index].print(game.players[k].name..":"..v);
+            end
+        end
+    end);
+
     remote.add_interface("ChatToFile", {
         chat = remoteCall,
         playerUpdate = remoteUpdate

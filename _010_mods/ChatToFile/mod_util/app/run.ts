@@ -164,7 +164,7 @@ if (twitchUser) {
 
             switch(userstate["message-type"]) {
                 case "chat":
-                    onChat(message, false, userstate.name);
+                    onChat(message, false, userstate.username);
                     break;
                 case "whisper":
                     onChat(message, true, userstate.username);
@@ -182,12 +182,13 @@ if (twitchUser) {
 
                 if (runonce == false) {
                     tmiClient.mods(twitchChannel).then((data: string[]) => {
+                        debug("info", "[twitch:mods,"+twitchChannel+"] "+data.join(", "));
                         data.forEach(m => {
                             if (m == twitchUser) {
                                 tmiIsMod = true;
                             }
                         });
-                        if (twitchUser.toLowerCase() == args.c.toLowerCase()) {
+                        if (twitchUser && twitchChannel && twitchUser.toLowerCase() == twitchChannel.toLowerCase()) {
                             tmiIsMod = true;
                         }
 
@@ -250,92 +251,94 @@ function onChat(message: string, whisper?: boolean, user?: string) {
     -!Online
     -!Players
      */
-    if (user.toLowerCase() == twitchUser.toLowerCase()) {
+    if (user && twitchUser && user.toLowerCase() == twitchUser.toLowerCase()) {
         return;
     }
 
-    let m = "";
-    message = message.toLowerCase();
-    if (message.indexOf('!ctfcmd') > -1) {
-        m = "!CTFCmd displays this help command " +
-            "!Online shows the online players_____________________ " +
-            "!Players shows the players that have been on the map____ " +
-            "!Deaths <PlayerName> Shows the total deaths or the deaths of the specified player_______________________ " +
-            "!Messages <PlayerName> Shows the total amount of messages, or the amount of messages of the specified player "
-    } else if (message.indexOf('!online') > -1) {
-        m = "There are " + online.length + " players online: " + online.join(", ");
-    } else if (message.indexOf('!players') > -1) {
-        m = players.length + " players have been on this map: " + players.join(", ");
-    } else if (message.indexOf('!deaths') > -1) {
-        let split = message.split(" ");
-        let next = false;
-        let val = null;
-        split.forEach(v=> {
-            if (v.length > 0) {
-                if (next == true) {
-                    val = v;
-                    next = false;
-                } else if (v == "!deaths") {
-                    next = true;
+    if (message) {
+        let m = "";
+        message = message.toLowerCase();
+        if (message.indexOf('!ctfcmd') > -1) {
+            m = "!CTFCmd " +
+                "!Online " +
+                "!Players " +
+                "!Deaths <PlayerName> " +
+                "!Messages <PlayerName> "
+        } else if (message.indexOf('!online') > -1) {
+            m = "There are " + online.length + " players online: " + online.join(", ");
+        } else if (message.indexOf('!players') > -1) {
+            m = players.length + " players have been on this map: " + players.join(", ");
+        } else if (message.indexOf('!deaths') > -1) {
+            let split = message.split(" ");
+            let next = false;
+            let val = null;
+            split.forEach(v => {
+                if (v.length > 0) {
+                    if (next == true) {
+                        val = v;
+                        next = false;
+                    } else if (v == "!deaths") {
+                        next = true;
+                    }
                 }
-            }
-        });
+            });
 
-        if (val == null) {
-            let amount = 0;
-            for (let k in playerDeaths) {
-                if (playerDeaths.hasOwnProperty(k)) {
-                    amount += playerDeaths[k];
+            if (val == null) {
+                let amount = 0;
+                for (let k in playerDeaths) {
+                    if (playerDeaths.hasOwnProperty(k)) {
+                        amount += playerDeaths[k];
+                    }
                 }
-            }
 
-            m = "There have been " + amount + " deaths in this map";
-        } else {
-            if (playerDeaths.hasOwnProperty(val)) {
-                m = val + " has died " + playerDeaths[val] + " times";
+                m = "There have been " + amount + " deaths in this map";
             } else {
-                m = "The player " + val + " has not been on this map yet";
-            }
-        }
-    } else if (message.indexOf('!messages') > -1) {
-        let split = message.split(" ");
-        let next = false;
-        let val = null;
-        split.forEach(v=> {
-            if (v.length > 0) {
-                if (next == true) {
-                    val = v;
-                    next = false;
-                } else if (v == "!messages") {
-                    next = true;
+                if (playerDeaths.hasOwnProperty(val)) {
+                    m = val + " has died " + playerDeaths[val] + " times";
+                } else {
+                    m = "The player " + val + " has not been on this map yet";
                 }
             }
-        });
-
-        if (val == null) {
-            let amount = 0;
-            for (let k in playerMessages) {
-                if (playerMessages.hasOwnProperty(k)) {
-                    amount += playerMessages[k];
+        } else if (message.indexOf('!messages') > -1) {
+            let split = message.split(" ");
+            let next = false;
+            let val = null;
+            split.forEach(v => {
+                if (v.length > 0) {
+                    if (next == true) {
+                        val = v;
+                        next = false;
+                    } else if (v == "!messages") {
+                        next = true;
+                    }
                 }
-            }
+            });
 
-            m = "There have been " + amount + " messages sent in this map";
-        } else {
-            if (playerMessages.hasOwnProperty(val)) {
-                m = val + " has sent " + playerMessages[val] + " messages";
+            if (val == null) {
+                let amount = 0;
+                for (let k in playerMessages) {
+                    if (playerMessages.hasOwnProperty(k)) {
+                        amount += playerMessages[k];
+                    }
+                }
+
+                m = "There have been " + amount + " messages sent in this map";
             } else {
-                m = "The player " + val + " has not been on this map yet";
+                if (playerMessages.hasOwnProperty(val)) {
+                    m = val + " has sent " + playerMessages[val] + " messages";
+                } else {
+                    m = "The player " + val + " has not been on this map yet";
+                }
             }
         }
-    }
 
-    if (whisper) {
-        if (tmiConnected) {
-            tmiClient.whisper(user, m);
+        if (whisper) {
+            if (tmiConnected) {
+                tmiClient.whisper(user, m);
+            }
+        } else {
+            queue.push(m);
         }
-    } else {
-        queue.push(m);
     }
 }
 

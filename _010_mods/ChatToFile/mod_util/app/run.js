@@ -151,7 +151,7 @@ if (twitchUser) {
             }
             switch (userstate["message-type"]) {
                 case "chat":
-                    onChat(message, false, userstate.name);
+                    onChat(message, false, userstate.username);
                     break;
                 case "whisper":
                     onChat(message, true, userstate.username);
@@ -166,12 +166,13 @@ if (twitchUser) {
                 tmiConnected = true;
                 if (runonce == false) {
                     tmiClient.mods(twitchChannel).then(function (data) {
+                        debug("info", "[twitch:mods," + twitchChannel + "] " + data.join(", "));
                         data.forEach(function (m) {
                             if (m == twitchUser) {
                                 tmiIsMod = true;
                             }
                         });
-                        if (twitchUser.toLowerCase() == args.c.toLowerCase()) {
+                        if (twitchUser && twitchChannel && twitchUser.toLowerCase() == twitchChannel.toLowerCase()) {
                             tmiIsMod = true;
                         }
                         if (tmiIsMod) {
@@ -228,97 +229,99 @@ function onChat(message, whisper, user) {
     -!Online
     -!Players
      */
-    if (user.toLowerCase() == twitchUser.toLowerCase()) {
+    if (user && twitchUser && user.toLowerCase() == twitchUser.toLowerCase()) {
         return;
     }
-    var m = "";
-    message = message.toLowerCase();
-    if (message.indexOf('!ctfcmd') > -1) {
-        m = "!CTFCmd displays this help command " +
-            "!Online shows the online players_____________________ " +
-            "!Players shows the players that have been on the map____ " +
-            "!Deaths <PlayerName> Shows the total deaths or the deaths of the specified player_______________________ " +
-            "!Messages <PlayerName> Shows the total amount of messages, or the amount of messages of the specified player ";
-    }
-    else if (message.indexOf('!online') > -1) {
-        m = "There are " + online.length + " players online: " + online.join(", ");
-    }
-    else if (message.indexOf('!players') > -1) {
-        m = players.length + " players have been on this map: " + players.join(", ");
-    }
-    else if (message.indexOf('!deaths') > -1) {
-        var split = message.split(" ");
-        var next_1 = false;
-        var val_1 = null;
-        split.forEach(function (v) {
-            if (v.length > 0) {
-                if (next_1 == true) {
-                    val_1 = v;
-                    next_1 = false;
-                }
-                else if (v == "!deaths") {
-                    next_1 = true;
-                }
-            }
-        });
-        if (val_1 == null) {
-            var amount = 0;
-            for (var k in playerDeaths) {
-                if (playerDeaths.hasOwnProperty(k)) {
-                    amount += playerDeaths[k];
-                }
-            }
-            m = "There have been " + amount + " deaths in this map";
+    if (message) {
+        var m = "";
+        message = message.toLowerCase();
+        if (message.indexOf('!ctfcmd') > -1) {
+            m = "!CTFCmd " +
+                "!Online " +
+                "!Players " +
+                "!Deaths <PlayerName> " +
+                "!Messages <PlayerName> ";
         }
-        else {
-            if (playerDeaths.hasOwnProperty(val_1)) {
-                m = val_1 + " has died " + playerDeaths[val_1] + " times";
+        else if (message.indexOf('!online') > -1) {
+            m = "There are " + online.length + " players online: " + online.join(", ");
+        }
+        else if (message.indexOf('!players') > -1) {
+            m = players.length + " players have been on this map: " + players.join(", ");
+        }
+        else if (message.indexOf('!deaths') > -1) {
+            var split = message.split(" ");
+            var next_1 = false;
+            var val_1 = null;
+            split.forEach(function (v) {
+                if (v.length > 0) {
+                    if (next_1 == true) {
+                        val_1 = v;
+                        next_1 = false;
+                    }
+                    else if (v == "!deaths") {
+                        next_1 = true;
+                    }
+                }
+            });
+            if (val_1 == null) {
+                var amount = 0;
+                for (var k in playerDeaths) {
+                    if (playerDeaths.hasOwnProperty(k)) {
+                        amount += playerDeaths[k];
+                    }
+                }
+                m = "There have been " + amount + " deaths in this map";
             }
             else {
-                m = "The player " + val_1 + " has not been on this map yet";
+                if (playerDeaths.hasOwnProperty(val_1)) {
+                    m = val_1 + " has died " + playerDeaths[val_1] + " times";
+                }
+                else {
+                    m = "The player " + val_1 + " has not been on this map yet";
+                }
             }
         }
-    }
-    else if (message.indexOf('!messages') > -1) {
-        var split = message.split(" ");
-        var next_2 = false;
-        var val_2 = null;
-        split.forEach(function (v) {
-            if (v.length > 0) {
-                if (next_2 == true) {
-                    val_2 = v;
-                    next_2 = false;
+        else if (message.indexOf('!messages') > -1) {
+            var split = message.split(" ");
+            var next_2 = false;
+            var val_2 = null;
+            split.forEach(function (v) {
+                if (v.length > 0) {
+                    if (next_2 == true) {
+                        val_2 = v;
+                        next_2 = false;
+                    }
+                    else if (v == "!messages") {
+                        next_2 = true;
+                    }
                 }
-                else if (v == "!messages") {
-                    next_2 = true;
+            });
+            if (val_2 == null) {
+                var amount = 0;
+                for (var k in playerMessages) {
+                    if (playerMessages.hasOwnProperty(k)) {
+                        amount += playerMessages[k];
+                    }
                 }
-            }
-        });
-        if (val_2 == null) {
-            var amount = 0;
-            for (var k in playerMessages) {
-                if (playerMessages.hasOwnProperty(k)) {
-                    amount += playerMessages[k];
-                }
-            }
-            m = "There have been " + amount + " messages sent in this map";
-        }
-        else {
-            if (playerMessages.hasOwnProperty(val_2)) {
-                m = val_2 + " has sent " + playerMessages[val_2] + " messages";
+                m = "There have been " + amount + " messages sent in this map";
             }
             else {
-                m = "The player " + val_2 + " has not been on this map yet";
+                if (playerMessages.hasOwnProperty(val_2)) {
+                    m = val_2 + " has sent " + playerMessages[val_2] + " messages";
+                }
+                else {
+                    m = "The player " + val_2 + " has not been on this map yet";
+                }
             }
         }
-    }
-    if (whisper) {
-        if (tmiConnected) {
-            tmiClient.whisper(user, m);
+        if (whisper) {
+            if (tmiConnected) {
+                tmiClient.whisper(user, m);
+            }
         }
-    }
-    else {
-        queue.push(m);
+        else {
+            queue.push(m);
+        }
     }
 }
 var tmpFileData = "";

@@ -1,5 +1,4 @@
 # Chat to File #
-** Currently waiting on communication with ShredGuy99 to realease 0.2.x **
 Useful tool for streamers playing multilayer games with their streaming overlays in front of the chat, logs chat/leave/join/death and even supports other mods sending messages to twitch chat
 ## Description ##
 In the new and great 0.2.x release of the mod
@@ -41,6 +40,12 @@ My personal install instructions:
 20. Double Click / run the *run.cmd* file
 ## Changelog ##
 The changes the mod has gone trough
+> ### 0.2.5 ###
+> -   Fixed reflection of mod powers
+> ### 0.2.4 ###
+> -   Fixed a bug where when someone died the server could crash
+> -   Fixed it so files actually got written
+> -   Added /ChatToFileSetDeath <PlayerName> <DeathCount> command
 > ### 0.2.3 ###
 > -   Changed a typo in the app where it said messages instead of deaths
 > ### 0.2.2 ###

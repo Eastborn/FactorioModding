@@ -63,15 +63,19 @@ export default function (projectName, cb) {
     });
 
     gulp.task("gulp_plugin_build_mod_create_exe_nodejs", (cb) => {
-        ChildProcess.exec("pkg \"../_010_mods/ChatToFile/mod_util/app/run.js\" --out-dir \"../_010_mods/ChatToFile/mod_util/exe/\"",
-            (error, stdout, stderr)=>{
-                if (error) {
-                    console.error("error packaging the app,", error);
-                } else {
-                    console.log("Created packaged app")
-                }
-                cb();
-            });
+        if (projectName.indexOf("ChatToFile") > -1) {
+            ChildProcess.exec("pkg \"../_010_mods/ChatToFile/mod_util/app/run.js\" --out-dir \"../_010_mods/ChatToFile/mod_util/exe/\"",
+                (error, stdout, stderr) => {
+                    if (error) {
+                        console.error("error packaging the app,", error);
+                    } else {
+                        console.log("Created packaged app")
+                    }
+                    cb();
+                });
+        } else {
+            cb();
+        }
     });
 
     return gulpSequence(

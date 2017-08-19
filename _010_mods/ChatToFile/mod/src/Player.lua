@@ -173,13 +173,21 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
                 elseif (evt.cause.name == "distractor") then reason = "Distractor robot";
                 elseif (evt.cause.name == "destroyer") then reason = "Destroyer robot";
                 end
-                reason = reason .. " created by " .. evt.cause.last_user.name;
+                local lastuser = "<unkown user>";
+                if (evt.cause.last_user) then
+                    lastuser = evt.cause.last_user.name
+                end
+                reason = reason .. " created by " .. lastuser;
             else
                 if (evt.cause.name == "gun-turret") then reason = "Gun Turret";
                 elseif (evt.cause.name == "laser-turret") then reason = "Laser Turret";
                 elseif (evt.cause.name == "flamethrower-turret") then reason = "Flamethrower Turret";
                 end
-                reason = reason .. " last changed by " .. evt.cause.last_user.name;
+                local lastuser = "<unkown user>";
+                if (evt.cause.last_user) then
+                    lastuser = evt.cause.last_user.name
+                end
+                reason = reason .. " last changed by " .. lastuser;
             end
         end
     end

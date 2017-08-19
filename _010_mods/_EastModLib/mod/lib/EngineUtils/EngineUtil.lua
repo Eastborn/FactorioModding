@@ -175,7 +175,7 @@ function EngineUtil.TableToString(tt, indent, done, getMetaAgain)
             table.insert(sb, string.rep (" ", indent)) -- indent it
             if type (value) == "table" and not done [value] then
                 done [value] = true
-                table.insert(sb, "{\n");
+                table.insert(sb, tostring(key).." = {\n");
                 table.insert(sb, EngineUtil.TableToString(value, indent + 2, done))
                 table.insert(sb, string.rep (" ", indent)) -- indent it
                 table.insert(sb, "}\n");
