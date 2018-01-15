@@ -40,6 +40,20 @@ My personal install instructions:
 20. Double Click / run the *run.cmd* file
 ## Changelog ##
 The changes the mod has gone trough
+> ### 0.2.11 ###
+> -   Added remote function: "remoteAddDisplayName" so you can call remote.call("ChatToFile", "remoteAddDisplayName", "entity-name", "Entity Name Is Pretty Now") to add a display name for your entity that kills people
+> ### 0.2.10 ###
+> -   Tested mp things and artillery items added in 0.16
+> ### 0.2.9 CAREFUL, needs more testing ###
+> -   Refined uploading to imgur of the screenshots on death
+> -   Misc bugfixes
+> ### 0.2.8 CAREFUL, needs more testing ###
+> -   Added death screenshot functionality
+> ### 0.2.7 CAREFUL, needs more testing ###
+> -   Updated to 0.16.x
+> -   Changed some code that broke between 0.15.x and 0.16.x migration
+> ### 0.2.6 ###
+> -   Updated NPM packages
 > ### 0.2.5 ###
 > -   Fixed reflection of mod powers
 > ### 0.2.4 ###
@@ -87,6 +101,8 @@ The Remote functions available to other mods via *remote.call("ChatToFile", "<fu
 > Calling this function will allow you to send the <message> to the chat file to be send to twitch
 > ### playerUpdate(<player_index>) ###
 > Calling this function will allow you to update the player model used by ChatToFile just in case you do something weird with the player and data isn't represented correctly - *execute before chat command*
+> ### remoteAddDisplayName(<entity_name>, <display_name>) ###
+> Calling this function lets you add a display name for entities that can kill players to be correctly displayed in the death event
 ___
 ___
 ___

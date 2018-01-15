@@ -27,7 +27,7 @@ function Statics:save()
     local _messages = 0;
     local _playerMessages = {};
     local _online = {};
-    local _players = {}
+    local _players = {};
     for _,v in ipairs(players) do
         _deaths = _deaths + #v.deaths;
         _playerDeaths[v.name] = #v.deaths;

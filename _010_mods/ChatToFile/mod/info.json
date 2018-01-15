@@ -1,11 +1,11 @@
 {
   "name": "ChatToFile",
-  "version": "0.2.5",
+  "version": "0.2.11",
   "title": "Chat To File",
   "author": "Eastborn",
   "contact": "eastborn@shadowimage.org",
   "homepage": "",
   "description": "Mod catches chat by players and much more, writes this to a file and with an app you can connect this to twitch and discord",
-  "factorio_version": "0.15",
+  "factorio_version": "0.16",
   "dependencies": []
 }

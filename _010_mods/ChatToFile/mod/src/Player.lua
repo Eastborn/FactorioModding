@@ -49,12 +49,14 @@ function Player:update(player_index, engine)
     self.settingEnable = engine.settings:getRuntimePlayerSetting(p, "ctf-enable");
     self.settingChatEnable =engine.settings:getRuntimePlayerSetting(p, "ctf-chatenable");
     self.settingDeathEnable = engine.settings:getRuntimePlayerSetting(p, "ctf-deathenable");
+    self.settingDeathScreenshotEnable = engine.settings:getRuntimePlayerSetting(p, "ctf-deathscreenshotenable");
     self.settingJoinEnable = engine.settings:getRuntimePlayerSetting(p, "ctf-joinenable");
     self.settingLeaveEnable = engine.settings:getRuntimePlayerSetting(p, "ctf-leaveenable");
     self.settingRemoteEnable = engine.settings:getRuntimePlayerSetting(p, "ctf-remoteenable");
     self.settingLocation = engine.settings:getRuntimePlayerSetting(p, "ctf-location");
     self.settingSettingsLocation = engine.settings:getRuntimePlayerSetting(p, "ctf-settingslocation");
     self.settingStaticsLocation = engine.settings:getRuntimePlayerSetting(p, "ctf-staticslocation");
+    self.settingDeathScreenshotLocation = engine.settings:getRuntimePlayerSetting(p, "ctf-deathscreenlocation");
     self.settingDelay = engine.settings:getRuntimePlayerSetting(p, "ctf-delay");
     self.settingPrefix = engine.settings:getRuntimePlayerSetting(p, "ctf-prefix");
     self.settingChatSub = engine.settings:getRuntimePlayerSetting(p, "ctf-chatsub");
@@ -102,7 +104,7 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
     local reason = "<unknown reason>";
 
     if (evt.cause == nil) then
-        reason = "Landmine or Poison Capsule"
+        reason = "<unknown reason> most likely a Landmine or Poison Capsule"
     else
         if (evt.cause.name == "small-worm-turret") then reason = "Small Worm";
         elseif (evt.cause.name == "medium-worm-turret") then reason = "Medium Worm";
@@ -125,14 +127,23 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
 
                 local passengers = {};
                 local function getPassengerFromStock(stock)
-                    if (stock.passenger) then
-                        table.insert(passengers, stock.passenger.player.name);
+                    local passenger = stock.get_driver();
+                    if (passenger) then
+                        table.insert(passengers, passenger.player.name);
                     end
                 end
                 if (train.locomotives.front_movers) then for _,v in pairs(train.locomotives.front_movers) do getPassengerFromStock(v) end end
                 if (train.locomotives.back_movers) then for _,v in pairs(train.locomotives.back_movers) do getPassengerFromStock(v) end end
                 for _,v in pairs(train.cargo_wagons) do getPassengerFromStock(v) end
                 for _,v in pairs(train.fluid_wagons) do getPassengerFromStock(v) end
+                for _,v in pairs(train.carriages) do
+                    if v.name == "artillery-wagon" then
+                        local passenger = v.get_driver();
+                        if (passenger) then
+                            table.insert(passengers, passenger.player.name);
+                        end
+                    end
+                end
                 if (manual) then
                     if (#passengers > 0) then
                         reason = reason.." being driven by "..table.concat(passengers, ", ");
@@ -153,15 +164,15 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
             elseif (evt.cause.type == "car") then
                 if (evt.cause.name == "car") then
                     reason = "Car"
-                    if (evt.cause.passenger) then
-                        reason = reason.." driven by "..evt.cause.passenger.player.name;
+                    if (evt.cause.get_driver()) then
+                        reason = reason.." driven by "..evt.cause.get_driver().player.name;
                     elseif (evt.cause.last_user) then
                         reason = reason.." last changed by"..evt.cause.last_user.name;
                     end
                 elseif (evt.cause.name == "tank") then
                     reason = "Tank"
-                    if (evt.cause.passenger) then
-                        reason = reason.." driven by "..evt.cause.passenger.player.name;
+                    if (evt.cause.get_driver()) then
+                        reason = reason.." driven by "..evt.cause.get_driver().player.name;
                     elseif (evt.cause.last_user) then
                         reason = reason.." last changed by"..evt.cause.last_user.name;
                     end
@@ -182,17 +193,29 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
                 if (evt.cause.name == "gun-turret") then reason = "Gun Turret";
                 elseif (evt.cause.name == "laser-turret") then reason = "Laser Turret";
                 elseif (evt.cause.name == "flamethrower-turret") then reason = "Flamethrower Turret";
+                elseif (evt.cause.name == "artillery-turret") then reason = "Artillery Turret";
+                elseif (evt.cause.name == "artillery-wagon") then reason = "Artillery Wagon";
                 end
-                local lastuser = "<unkown user>";
+                local lastuser = nil;
                 if (evt.cause.last_user) then
                     lastuser = evt.cause.last_user.name
                 end
-                reason = reason .. " last changed by " .. lastuser;
+                if (lastuser) then
+                    reason = reason .. " last changed by " .. lastuser;
+                else
+                    if global.CTF_displayNames and global.CTF_displayNames[evt.cause.name] then
+                        reason = global.CTF_displayNames[evt.cause.name];
+                    else
+                        reason =  evt.cause.name;
+                    end
+                end
             end
         end
     end
 
     table.insert(self.deaths, reason);
+
+    local latestDeath = #self.deaths;
 
     local totalDeaths = 0;
     local forceDeaths = 0;
@@ -209,6 +232,25 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
     end
 
     for _,forPlayer in ipairs(forPlayers) do
+        local deathfile = nil;
+
+        if ((forPlayer.settingEnable) and (forPlayer.settingDeathScreenshotEnable)) then
+            deathfile = forPlayer.basePath .. forPlayer.settingDeathScreenshotLocation .. 'death-' .. self.name .. '-' .. latestDeath .. '-' .. game.tick .. '.png';
+
+            game.take_screenshot{
+                player=self.name,
+                by_player=forPlayer.player_index,
+                surface=game.players[self.player_index].surface.index,
+                position=game.players[self.player_index].position,
+                resolution= {1280 , 720},
+                zoom=0.8,
+                path=deathfile,
+                show_gui=false,
+                show_entity_info=true,
+                anti_alias=false
+            }
+        end
+
         if ((forPlayer.settingEnable) and (forPlayer.settingDeathEnable)) then
             local deathsSameReason = 0;
             for _,v in ipairs(self.deaths) do
@@ -234,10 +276,16 @@ function Player:logDeath(evt, allPlayers, forPlayers, engine)
                         :gsub("$p", player)
                         :gsub("$r", rsn)
                         :gsub("$s", deathsSameReason)
-                        :gsub("$t", totalDeaths) ..
-                    "\n";
+                        :gsub("$t", totalDeaths);
 
-            engine.files:writeFile(file, data, true, forPlayer.player_index);
+            local dataFin
+            if (deathfile ~= nil ) then
+                dataFin = data .. '[{<>}]' .. deathfile .. "\n";
+            else
+                dataFin = data .. "\n";
+            end
+
+            engine.files:writeFile(file, dataFin, true, forPlayer.player_index);
         end
     end
 end
@@ -338,9 +386,11 @@ function Player:saveSettingsFile(engine)
             ", \"location\": \"" .. self.settingLocation..
             "\", \"settingsLocation\": \""..self.settingSettingsLocation..
             "\", \"staticsLocation\": \""..self.settingStaticsLocation..
+            "\", \"deathScreenshotLocation\": \""..self.settingDeathScreenshotLocation..
             "\", \"enable\": "..gBS(self.settingEnable)..
             ", \"chatEnable\": "..gBS(self.settingChatEnable)..
             ", \"deathEnable\": "..gBS(self.settingDeathEnable)..
+            ", \"deathScreenshotEnable\": "..gBS(self.settingDeathScreenshotEnable)..
             ", \"joinEnable\": "..gBS(self.settingJoinEnable)..
             ", \"leaveEnable\": "..gBS(self.settingLeaveEnable)..
             ", \"remoteEnable\": "..gBS(self.settingRemoteEnable)..

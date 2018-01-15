@@ -1,10 +1,13 @@
 Bug Fixes:
-deaths last user check if exists
+Artillery turret                                            DONE
+Artillery wagon                                             DONE
+Unknown reason, most likely landmine or poison cloud        DONE
 
 Features:
 - Interface
-- Screenshots of deaths
-- commands to set deaths and
+- Screenshots of deaths                 DONE
+- commands to set deaths and            DONE
+- Screenshots of deaths upload to imgur DONE
 
 v 0.2
     -!CTFCmd

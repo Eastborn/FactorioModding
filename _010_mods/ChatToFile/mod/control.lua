@@ -125,6 +125,13 @@ local function remoteUpdate(player_index)
     end
 end
 
+local function remoteAddDisplayName(entityName, displayName)
+    if not global.CTF_displayNames then
+        global.CTF_displayNames = {}
+    end
+    global.CTF_displayNames[entityName] = displayName
+end
+
 local function load()
     local events = engine.events;
     local settings = engine.settings;
@@ -229,7 +236,8 @@ local function load()
 
     remote.add_interface("ChatToFile", {
         chat = remoteCall,
-        playerUpdate = remoteUpdate
+        playerUpdate = remoteUpdate,
+        remoteAddDisplayName = remoteAddDisplayName
     });
 end
 

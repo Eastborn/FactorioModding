@@ -6,9 +6,9 @@
 
 import * as tmi from "tmi.js";
 import * as discord from "discord.js";
+import * as imgur from 'imgur-node-api';
 
 import * as fs from "fs";
-import * as request from "request";
 
 import * as yargs from "yargs";
 
@@ -80,6 +80,7 @@ function debug(level, message, ...a) {
     console.log("["+("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)+"]", level+":", message, args.length>0?args:"");
 }
 
+imgur.setClientID('60672811b6e4c02');
 let file = args.f;
 let twitchUser = typeof(args.u) === "string" ? args.u.toLowerCase() : args.u;
 let twitchOauthPass = args.o;
@@ -104,6 +105,7 @@ let settingsDeathSub = settings.deathSub;
 let settingsJoinSub = settings.joinSub;
 let settingsLeaveSub = settings.leaveSub;
 let settingsSave = settings.save;
+let settingsScreensLoc = settings.deathScreenshotLocation;
 
 function updateSettings(file: string) {
     settings = JSON.parse(fs.readFileSync(file).toString());
@@ -121,6 +123,7 @@ function updateSettings(file: string) {
     settingsJoinSub = settings.joinSub;
     settingsLeaveSub = settings.leaveSub;
     settingsSave = settings.save;
+    settingsScreensLoc = settings.deathScreenshotLocation;
 
     if (settings.staticsLocation != settingsStaticsFile) {
         changeStaticsFile(settingsStaticsFile, settings.staticsLocation);
@@ -201,8 +204,6 @@ if (twitchUser) {
                             setInterval(messageDelay, 1000);
                         }
                         runonce = true;
-
-
                     });
                 }
             }
@@ -366,11 +367,41 @@ function changeChatFile(oldFile, newFile) {
 
                 if (data.length > 0) {
                     let chatData = data.split('\n');
-
-                    chatData.forEach(function (l) {
+                    let cont = (l) => {
                         let trimmed = l.trim();
                         if (trimmed.length > 0) {
                             sendChat(trimmed);
+                        }
+                    };
+
+                    chatData.forEach(function (l) {
+                        if (l.indexOf('[{<>}]') > -1) {
+                            let picLoc = l.substring(l.indexOf('[{<>}]')+6);
+                            l = l.substring(0, l.indexOf('[{<>}]'));
+
+                            let actualLoc = picLoc.substring(picLoc.indexOf(settingsScreensLoc));
+                            setTimeout(() => {
+                                imgur.upload(actualLoc, (err, res) => {
+                                    if (err) {
+                                        return cont(l);
+                                    }
+                                    let defLink = res.data.link;
+                                    imgur.update({
+                                        id: res.data.id,
+                                        title: "[Factorio] [ChatToFile] " + l,
+                                        description: l
+                                    }, (err, res) => {
+                                        if (err) {
+                                            return cont(l);
+                                        }
+                                        //TODO This shit doesnt let me log in to delete stuff but w/e
+                                        debug('info', 'Uploaded Death screenshot('+actualLoc+') to imgur('+defLink+')');
+                                        cont(l + ' ' + defLink);
+                                    });
+                                })
+                            }, 500)
+                        } else {
+                            cont(l);
                         }
                     });
                     fs.writeFile(settingsFile, '', function () {

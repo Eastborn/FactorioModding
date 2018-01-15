@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /// <reference path="../../../../typings/globals/node/index.d.ts" />
 var tmi = require("tmi.js");
 var discord = require("discord.js");
+var imgur = require("imgur-node-api");
 var fs = require("fs");
 var yargs = require("yargs");
 var args = yargs.options({
@@ -77,6 +78,7 @@ function debug(level, message) {
     var d = new Date();
     console.log("[" + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + "]", level + ":", message, args.length > 0 ? args : "");
 }
+imgur.setClientID('60672811b6e4c02');
 var file = args.f;
 var twitchUser = typeof (args.u) === "string" ? args.u.toLowerCase() : args.u;
 var twitchOauthPass = args.o;
@@ -100,6 +102,7 @@ var settingsDeathSub = settings.deathSub;
 var settingsJoinSub = settings.joinSub;
 var settingsLeaveSub = settings.leaveSub;
 var settingsSave = settings.save;
+var settingsScreensLoc = settings.deathScreenshotLocation;
 function updateSettings(file) {
     settings = JSON.parse(fs.readFileSync(file).toString());
     settingsDelay = settings.delay;
@@ -116,6 +119,7 @@ function updateSettings(file) {
     settingsJoinSub = settings.joinSub;
     settingsLeaveSub = settings.leaveSub;
     settingsSave = settings.save;
+    settingsScreensLoc = settings.deathScreenshotLocation;
     if (settings.staticsLocation != settingsStaticsFile) {
         changeStaticsFile(settingsStaticsFile, settings.staticsLocation);
         settingsStaticsFile = settings.staticsLocation;
@@ -343,10 +347,40 @@ function changeChatFile(oldFile, newFile) {
                 debug("info", "[file:" + settingsFile + "] File was read:", data);
                 if (data.length > 0) {
                     var chatData = data.split('\n');
-                    chatData.forEach(function (l) {
+                    var cont_1 = function (l) {
                         var trimmed = l.trim();
                         if (trimmed.length > 0) {
                             sendChat(trimmed);
+                        }
+                    };
+                    chatData.forEach(function (l) {
+                        if (l.indexOf('[{<>}]') > -1) {
+                            var picLoc = l.substring(l.indexOf('[{<>}]') + 6);
+                            l = l.substring(0, l.indexOf('[{<>}]'));
+                            var actualLoc_1 = picLoc.substring(picLoc.indexOf(settingsScreensLoc));
+                            setTimeout(function () {
+                                imgur.upload(actualLoc_1, function (err, res) {
+                                    if (err) {
+                                        return cont_1(l);
+                                    }
+                                    var defLink = res.data.link;
+                                    imgur.update({
+                                        id: res.data.id,
+                                        title: "[Factorio] [ChatToFile] " + l,
+                                        description: l
+                                    }, function (err, res) {
+                                        if (err) {
+                                            return cont_1(l);
+                                        }
+                                        //TODO This shit doesnt let me log in to delete stuff but w/e
+                                        debug('info', 'Uploaded Death screenshot(' + actualLoc_1 + ') to imgur(' + defLink + ')');
+                                        cont_1(l + ' ' + defLink);
+                                    });
+                                });
+                            }, 500);
+                        }
+                        else {
+                            cont_1(l);
                         }
                     });
                     fs.writeFile(settingsFile, '', function () {
